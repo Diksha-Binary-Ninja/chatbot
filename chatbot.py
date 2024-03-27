@@ -56,4 +56,5 @@ def market_price():
     # Redirect to the desired URL when the Market Price link is clicked
     return redirect('https://enam.gov.in/web/dashboard/trade-data')
 
-
+if __name__ == '__main__':
+    app.run(debug=True)
