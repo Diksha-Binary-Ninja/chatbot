@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 app = Flask(__name__)
 openai.api_key = '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'
 messages = []  # Initialize the messages list
-chromedriver_path = r'C:\Users\nkoni\OneDrive\chromedriver.exe'  # Update this with your actual path
+
 
 
 def get_weather(city):
@@ -56,5 +56,4 @@ def market_price():
     # Redirect to the desired URL when the Market Price link is clicked
     return redirect('https://enam.gov.in/web/dashboard/trade-data')
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
