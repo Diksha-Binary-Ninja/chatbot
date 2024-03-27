@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGoYnMP51paCLwB-Ig9P27eBdI0ty22g5OGA&usqp=CAU');
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+
+        .chat {
+            max-width: 600px;
+            margin: 50px auto;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .msg_head {
+            background-color: #007bff;
+            color: #fff;
+            padding: 15px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .user_img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .msg_card_body {
+            height: 300px;
+            overflow-y: scroll;
+        }
+
+        .msg_cotainer_send,
+        .msg_cotainer {
+            max-width: 75%;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 5px 0;
+        }
+
+        .msg_cotainer_send {
+            background-color: #007bff;
+            color: #fff;
+            align-self: flex-end;
+        }
+
+        .msg_cotainer {
+            background-color: #f4f4f4;
+            color: #555;
+            align-self: flex-start;
+        }
+
+        .msg_time_send,
+        .msg_time {
+            color: #fff;
+            font-size: 12px;
+        }
+
+        .send_btn {
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 50%;
+            padding: 8px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .send_btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid h-100">
+        <div class="row justify-content-center h-100">
+            <div class="col-md-8 col-xl-6 chat">
+                <div class="card">
+                    <div class="card-header msg_head">
+                        <div class="d-flex bd-highlight">
+                            <div class="img_cont">
+                                <img src="https://via.placeholder.com/150" class="rounded-circle user_img">
+                                <span class="online_icon"></span>
+                            </div>
+                            <div class="user_info">
+                                <span>ChatBot</span>
+                                <p>Ask me anything!</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="messageFormeight" class="card-body msg_card_body"></div>
+                    <div class="card-footer">
+                        <button id="weatherBtn" class="btn btn-primary">Get Weather</button>
+                        <button id="marketBtn" class="btn btn-primary">Get Market Price</button>
+                        <form id="messageArea" class="input-group" action="/chat" method="POST">
+                            <input type="text" id="text" name="user_input" placeholder="Type your message..."
+                                autocomplete="off" class="form-control type_msg" required>
+                            <div class="input-group-append">
+                                <button type="submit" id="send" class="input-group-text send_btn"><i
+                                        class="fas fa-location-arrow"></i></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Handle weather button click event
+            $("#weatherBtn").on("click", function () {
+                var city = prompt("Enter city name:");
+                if (city !== null && city.trim() !== "") {
+                    $.ajax({
+                        data: { city: city },
+                        type: "POST",
+                        url: "/get_weather",
+                    }).done(function (data) {
+                        var weatherHtml = '<div class="d-flex justify-content-start mb-4">' +
+                            '<div class="msg_cotainer">' + data.content + '</div></div>';
+                        $("#messageFormeight").append(weatherHtml);
+                    });
+                }
+            });
+
+            // Handle market price button click event
+            $("#marketBtn").on("click", function () {
+                // Redirect the user to the Market Price URL
+                window.location.href = "https://enam.gov.in/web/dashboard/trade-data";
+            });
+
+
+            // Handle chat message submission
+            $("#messageArea").on("submit", function (event) {
+                event.preventDefault();
+                const date = new Date();
+                const hour = date.getHours();
+                const minute = date.getMinutes();
+                const str_time = hour + ":" + minute;
+                var rawText = $("#text").val();
+
+                var userHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">' +
+                    rawText + '<span class="msg_time_send">' + str_time + '</span></div><div class="img_cont_msg"><img src="https://via.placeholder.com/150" class="rounded-circle user_img_msg"></div></div>';
+
+                $("#text").val("");
+                $("#messageFormeight").append(userHtml);
+
+                $.ajax({
+                    data: {
+                        user_input: rawText,
+                    },
+                    type: "POST",
+                    url: "/chat",
+                }).done(function (data) {
+                    var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://via.placeholder.com/150" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' +
+                        data.content + '<span class="msg_time">' + str_time + '</span></div></div>';
+                    $("#messageFormeight").append(botHtml);
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
